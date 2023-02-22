@@ -9,6 +9,7 @@ const form = ref({
   title: "",
   content: "",
 });
+const noteColor = ref("#9EFFFF");
 const dataIndex = ref(null);
 
 const rules = reactive({
@@ -28,6 +29,33 @@ const rules = reactive({
   ],
 });
 
+const noteColors = ref([
+  {
+    name: "Blue",
+    code: "#9EFFFF",
+  },
+  {
+    name: "Purple",
+    code: "#B69CFF",
+  },
+  {
+    name: "Yellow",
+    code: "#FFF599",
+  },
+  {
+    name: "Green",
+    code: "#91F48F",
+  },
+  {
+    name: "Pink",
+    code: "#FD99FF",
+  },
+  {
+    name: "Red",
+    code: "#FF9E9E",
+  },
+]);
+
 // Sorts items in ascending order by creation date
 const notes_asc = computed(() =>
   notes.value.sort((a, b) => {
@@ -35,15 +63,18 @@ const notes_asc = computed(() =>
   })
 );
 
+//MARK: New note
 const newNote = () => {
+  console.log(noteColors.value);
   if (dataIndex.value != null) {
     resetForm();
   }
   dataIndex.value = null;
   dialogVisible.value = true;
-  formRef.value.clearValidate();
+  // formRef.value.clearValidate();
 };
 
+//MARK: Save note
 const saveNote = async (formEl) => {
   if (!formEl) return;
   await formEl.validate((valid) => {
@@ -52,6 +83,7 @@ const saveNote = async (formEl) => {
         notes.value.push({
           title: form.value.title,
           content: form.value.content,
+          color: noteColor.value,
           createdAt: new Date().getTime(),
         });
         ElMessage({
@@ -140,6 +172,7 @@ onMounted(() => {
           shadow="always"
           :body-style="{ padding: '20px' }"
           class="box-card"
+          :style="{ 'background-color': note.color }"
         >
           <template #header>
             <el-row align="middle">
@@ -196,6 +229,22 @@ onMounted(() => {
               rows="4"
             ></el-input>
           </el-form-item>
+          <el-form-item label="Color">
+            <el-radio-group v-model="noteColor">
+              <el-radio-button
+                v-for="color in noteColors"
+                :key="color.name"
+                :label="color.code"
+                :style="{
+                  '--el-radio-button-checked-bg-color': color.code,
+                  '--el-radio-button-checked-text-color': '#252525',
+                  '--el-radio-button-checked-border-color': color.code,
+                }"
+              >
+                {{ color.name }}
+              </el-radio-button>
+            </el-radio-group>
+          </el-form-item>
         </el-form>
       </span>
       <template #footer>
@@ -213,17 +262,17 @@ onMounted(() => {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
+  color: #fff;
   position: relative;
   height: 100%;
   top: 0px;
   bottom: 0px;
 }
 
-.header-row{
+.header-row {
   padding: 0px 1rem;
 }
-.button-col{
+.button-col {
   margin: auto;
 }
 
@@ -231,14 +280,56 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 
+.el-card{
+  border: none;
+}
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
+.el-card__header{
+  border-bottom: 1px solid #3B3B3B;
+}
+
 .box-card {
   max-height: 350px;
   overflow: auto;
+}
+.el-dialog {
+  background-color: #252525;
+}
+
+.el-form-item__label {
+  color: #fff;
+}
+.el-input {
+  --el-input-border-color: auto;
+}
+.el-input__wrapper {
+  background-color: #3b3b3b;
+}
+.el-input__inner {
+  background-color: #3b3b3b;
+  color: #fff;
+}
+
+.el-textarea {
+  --el-input-border-color: auto;
+}
+
+.el-textarea__inner {
+  background-color: #3b3b3b;
+  color: #fff;
+}
+
+.el-radio-button__inner {
+  background: #3b3b3b;
+  color: #fff;
+  border-color: #545454;
+}
+.el-radio-button:first-child .el-radio-button__inner{
+  border-left-color: #3B3B3B;
 }
 </style>
