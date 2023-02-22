@@ -93,6 +93,7 @@ const saveNote = async (formEl) => {
       } else {
         notes.value[dataIndex.value].title = form.value.title;
         notes.value[dataIndex.value].content = form.value.content;
+        notes.value[dataIndex.value].color = noteColor.value;
         ElMessage({
           message: "Note edited successfully.",
           type: "success",
@@ -107,11 +108,13 @@ const saveNote = async (formEl) => {
   });
 };
 
+//MARK: Edit note
 const editNote = (data, index) => {
   dataIndex.value = index;
   dialogVisible.value = true;
   form.value.title = data.title;
   form.value.content = data.content;
+  noteColor.value = data.color;
   formRef.value.clearValidate();
 };
 
@@ -123,6 +126,7 @@ watch(
   { deep: true }
 );
 
+//MARK: Delete note
 const deleteNote = (index) => {
   notes.value.splice(index, 1);
   ElMessage({
@@ -280,7 +284,7 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 
-.el-card{
+.el-card {
   border: none;
 }
 .card-header {
@@ -289,8 +293,8 @@ onMounted(() => {
   align-items: center;
 }
 
-.el-card__header{
-  border-bottom: 1px solid #3B3B3B;
+.el-card__header {
+  border-bottom: 1px solid #3b3b3b;
 }
 
 .box-card {
@@ -329,7 +333,7 @@ onMounted(() => {
   color: #fff;
   border-color: #545454;
 }
-.el-radio-button:first-child .el-radio-button__inner{
-  border-left-color: #3B3B3B;
+.el-radio-button:first-child .el-radio-button__inner {
+  border-left-color: #3b3b3b;
 }
 </style>
