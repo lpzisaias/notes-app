@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, reactive, ref, watch, computed } from "vue";
-import { Plus, Delete } from "@element-plus/icons-vue";
+import { Plus, Delete, Edit } from "@element-plus/icons-vue";
+import { ElMessage } from "element-plus";
 const notes = ref([]);
 const dialogVisible = ref(false);
 const formRef = ref();
@@ -8,20 +9,21 @@ const form = ref({
   title: "",
   content: "",
 });
+const dataIndex = ref(null);
 
 const rules = reactive({
   title: [
     {
       required: true,
       message: "Please input title",
-      trigger: "change",
+      trigger: "blur",
     },
   ],
   content: [
     {
       required: true,
       message: "Please input content",
-      trigger: "change",
+      trigger: "blur",
     },
   ],
 });
@@ -33,20 +35,37 @@ const notes_asc = computed(() =>
   })
 );
 
-const showDialog = () => {
+const newNote = () => {
+  if (dataIndex.value != null) {
+    resetForm();
+  }
+  dataIndex.value = null;
   dialogVisible.value = true;
   formRef.value.clearValidate();
 };
 
-const addNote = async (formEl) => {
+const saveNote = async (formEl) => {
   if (!formEl) return;
   await formEl.validate((valid) => {
     if (valid) {
-      notes.value.push({
-        title: form.value.title,
-        content: form.value.content,
-        createdAt: new Date().getTime(),
-      });
+      if (dataIndex.value === null) {
+        notes.value.push({
+          title: form.value.title,
+          content: form.value.content,
+          createdAt: new Date().getTime(),
+        });
+        ElMessage({
+          message: "Note added successfully.",
+          type: "success",
+        });
+      } else {
+        notes.value[dataIndex.value].title = form.value.title;
+        notes.value[dataIndex.value].content = form.value.content;
+        ElMessage({
+          message: "Note edited successfully.",
+          type: "success",
+        });
+      }
 
       dialogVisible.value = false;
       resetForm();
@@ -54,6 +73,14 @@ const addNote = async (formEl) => {
       return;
     }
   });
+};
+
+const editNote = (data, index) => {
+  dataIndex.value = index;
+  dialogVisible.value = true;
+  form.value.title = data.title;
+  form.value.content = data.content;
+  formRef.value.clearValidate();
 };
 
 watch(
@@ -66,6 +93,10 @@ watch(
 
 const deleteNote = (index) => {
   notes.value.splice(index, 1);
+  ElMessage({
+    message: "Note deleted successfully.",
+    type: "success",
+  });
 };
 const resetForm = () => {
   form.value.title = "";
@@ -80,17 +111,17 @@ onMounted(() => {
 <template>
   <div>
     <!-- // MARK: Header -->
-    <el-row align="middle">
+    <el-row align="middle" class="header-row">
       <el-col :span="12">
         <h1>My Notes</h1>
       </el-col>
-      <el-col :span="12" align="right">
+      <el-col class="button-col" :span="12" align="right">
         <el-button
           type="primary"
           :icon="Plus"
           circle
           size="large"
-          @click="showDialog"
+          @click="newNote"
         ></el-button>
       </el-col>
     </el-row>
@@ -102,7 +133,8 @@ onMounted(() => {
         :key="note.title"
         :xs="24"
         :sm="12"
-        :md="6"
+        :md="8"
+        :lg="6"
       >
         <el-card
           shadow="always"
@@ -110,14 +142,23 @@ onMounted(() => {
           class="box-card"
         >
           <template #header>
-            <div class="card-header">
-              <h3>{{ note.title }}</h3>
-              <el-button
-                type="danger"
-                :icon="Delete"
-                @click="deleteNote(index)"
-              ></el-button>
-            </div>
+            <el-row align="middle">
+              <el-col :span="12"
+                ><h3>{{ note.title }}</h3></el-col
+              >
+              <el-col :span="12" align="right"
+                ><el-button
+                  type="warning"
+                  :icon="Edit"
+                  @click="editNote(note, index)"
+                ></el-button>
+                <el-button
+                  type="danger"
+                  :icon="Delete"
+                  @click="deleteNote(index)"
+                ></el-button
+              ></el-col>
+            </el-row>
           </template>
           {{ note.content }}
         </el-card>
@@ -160,7 +201,7 @@ onMounted(() => {
       <template #footer>
         <span>
           <el-button @click="dialogVisible = false">Cancel</el-button>
-          <el-button type="primary" @click="addNote(formRef)">OK</el-button>
+          <el-button type="primary" @click="saveNote(formRef)">OK</el-button>
         </span>
       </template>
     </el-dialog>
@@ -177,6 +218,13 @@ onMounted(() => {
   height: 100%;
   top: 0px;
   bottom: 0px;
+}
+
+.header-row{
+  padding: 0px 1rem;
+}
+.button-col{
+  margin: auto;
 }
 
 .note-container .el-col {
